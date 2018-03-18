@@ -72,8 +72,8 @@
           <div class="panel panel-info">
             <div class="panel-heading">Asistente</div>
             <div class="panel-body">
-    			       Bienvenida/o:<br />
-                 CAROLINA LORENA BAJOS
+    			       <p>{{ paciente.Sexo == 'M' ?  'Bienvenido': 'Bienvenida'}}</p>
+                 <p>{{ paciente.Nombre }} {{ paciente.Apellido }}</p>
                  <p>
                    Recuerde que la asignación de turnos finaliza con la visualización de un código generado por el sistema, el mismo podrá ser solicitado por la secretaria del sector correspondiente el día de la consulta.
                  </p>
@@ -247,6 +247,10 @@
 <!-- /modal -->
 </div> <!-- /container -->
 
+
+<pre class="code">
+  {{ ajax_data }}
+</pre>
     <footer class="footer">
       <div class="container">
         <span class="text-muted">2018 - Copyright </span>
@@ -262,7 +266,8 @@
     <script src="wizard/turno.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
-
+    <script src="js/app.js"></script>
+    <script src="https://unpkg.com/vue-cookies@1.5.5/vue-cookies.js"></script>
 
     <script type="text/javascript">
 
@@ -272,30 +277,63 @@
         coberturas: [],
         especialidades:[],
         medicos: [],
-      ajax_data: []
+        paciente: [],
+        documento: "24823959",
+        clave: "IF2FZ8",
+        ajax_data: []
     },
-    created: function(){
-         this.$http.get('http://appturnos.markey.com.ar/hepta/Pacientes.svc/ObtenerCoberturasPaciente?CodigoPaciente=188780').then(function(response){
-      this.ajax_data = response.body;
-      this.coberturas = this.ajax_data.ObtenerCoberturasPacienteResult.CoberturasPaciente;
+      created: function(){
+        documento = this.$cookies.get("documento");
+        clave = this.$cookies.get("clave");
+        console.log(documento);
+        console.log(clave);
+        
+        this.$http.get(ws + 'Pacientes.svc/autenticarpaciente?Usuario=' + this.documento + '&Clave=' + this.clave).then(function(response){
+        this.ajax_data = response.body;
+        this.AuthToken = this.ajax_data.AutenticarPacienteResult.AuthToken;
+        this.paciente = this.ajax_data.AutenticarPacienteResult.Pacientes[0];
 
-      this.$http.get('http://appturnos.markey.com.ar/hepta/Turnos.svc/ObtenerEspecialidades').then(function(response){
-         this.ajax_data = response.body;
-         this.especialidades = this.ajax_data.ObtenerEspecialidadesResult.Especialidades;
-       }, function(){
-          alert('Error!');
-      });
+        if (this.AuthToken != null ){
+          console.log("login exitoso");
 
-      this.$http.get('http://appturnos.markey.com.ar/hepta/Turnos.svc/ObtenerProfesionales?CodigoEspecialidad=0&CodigoCobertura=1&CodigoPlan=1').then(function(response){
-         this.ajax_data = response.body;
-         this.medicos = this.ajax_data.ObtenerProfesionalesResult.Profesionales;
-       }, function(){
-          alert('Error!');
-      });
+          this.obtenerCoberturas();
+          this.obtenerEspecialidades();
+          //this.obtenerMedicos();
 
+        }else{
+          console.log("login fallido");
+          window.location.href = "index.html";
+        }
       }, function(){
-         alert('Error!');
-      });
+        console.log("error comunicacion vuelva a intentar");
+     });
+   },
+   methods:{
+     obtenerCoberturas: function(){
+       this.$http.get(ws +'Pacientes.svc/ObtenerCoberturasPaciente?CodigoPaciente=' + this.paciente.CodigoPaciente ).then(function(response){
+            this.ajax_data = response.body;
+            this.coberturas = this.ajax_data.ObtenerCoberturasPacienteResult.CoberturasPaciente;
+            }, function(){
+               console.log("error al recuperar coberturas")
+            });
+
+     },
+     obtenerEspecialidades: function(){
+       this.$http.get(ws +'Turnos.svc/ObtenerEspecialidades').then(function(response){
+          this.ajax_data = response.body;
+          this.especialidades = this.ajax_data.ObtenerEspecialidadesResult.Especialidades;
+        }, function(){
+           console.log("error al recuperar especialidades")
+       });
+     },
+     obtenerMedicos: function(){
+       this.$http.get(ws +'Turnos.svc/ObtenerProfesionales?CodigoEspecialidad=0&CodigoCobertura=1&CodigoPlan=1').then(function(response){
+          this.ajax_data = response.body;
+          this.medicos = this.ajax_data.ObtenerProfesionalesResult.Profesionales;
+        }, function(){
+           console.log("error al recuperar medicos")
+       });
+     }
    }
 });
 
