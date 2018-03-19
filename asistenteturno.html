@@ -43,9 +43,10 @@
 
 <div class="row" id="app">
   <pre class="code">
-    {{ CodigoEspecialidad }}
-    {{ CodigoCobertura }}
-    {{ CodigoPlan }}
+  CodigoEspecialidad  {{ CodigoEspecialidad }}
+  CodigoCobertura  {{ CodigoCobertura }}
+  CodigoPlan  {{ CodigoPlan }}
+  CodigoProfesional  {{ CodigoProfesional }}
   </pre>
 
   <div id="rootwizard">
@@ -132,27 +133,20 @@
             <div class="panel-heading">Opción de busqueda;</div>
             <div class="panel-body">
     			       Seleccione una opción para buscar:<br />
+
+                 <table class="table table-hover">
+                      <tbody>
+                          <tr v-for="(opcion, index) in opciones" class="item_check2">
+                            <td>
+                                <input type="radio" name="opciones" :value="opcion.valor">
+                            </td>
+                            <td>{{ opcion.descripcion }}</td>
+
+                          </tr>
+                      </tbody>
+                 </table>
+
             </div>
-
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadios1" value="Especialidad">
-              Busqueda por Especialidad
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadio2" value="Medico">
-              Busqueda por Médico
-            </label>
-          </div>
-
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadios3" value="Estudios">
-              Busqueda por Estudios
-            </label>
-          </div>
     	   </div>
 </div> <!-- /step 3-->
 
@@ -164,14 +158,10 @@
     <div class="panel-body">
 
    <table class="table table-hover">
-        <thead>
-          <th>&nbsp;</th>
-          <th>Especialidad</th>
-        </thead>
         <tbody>
             <tr v-for="(especialidad, index) in especialidades" class="item_check2">
               <td>
-                  <input type="radio" name="especialidad" :value="especialidad.CodigoEspecialidad" v-model="CodigoEspecialidad">
+                  <input type="radio" name="especialidades" :value="especialidad.CodigoEspecialidad" v-model="CodigoEspecialidad">
               </td>
               <td>{{ especialidad.Especialidad }}</td>
 
@@ -194,14 +184,11 @@
     <div class="panel-body">
 
    <table class="table table-hover">
-        <thead>
-          <th>&nbsp;</th>
-          <th>Médico</th>
-        </thead>
+
         <tbody>
             <tr v-for="(medico, index) in medicos" class="item_check2">
               <td>
-                  <input type="radio" name="medico" :value="medico.CodigoProfesional" >
+                  <input type="radio" name="medico" :value="medico.CodigoProfesional" v-model="CodigoProfesional" >
               </td>
               <td>{{ medico.Profesional }}</td>
 
@@ -211,10 +198,29 @@
 
 
 
-    </div>
-  </div>  <!-- /Especialidad -->
 
-</div> <!-- /step 4 -->
+    </div>
+  </div>  <!-- /medico -->
+
+</div> <!-- /step 5 -->
+
+<div class="tab-pane" id="tab7">
+  Seleccione la fecha estimada.<br />
+
+
+  <div class="panel panel-info">
+    <div class="panel-heading">Fecha</div>
+    <div class="panel-body">
+      <p>
+        Seleccione la fecha estimada.
+      </p>
+   <label for="Fecha">Primer turno a partir del: </label> <input type="date" name="Fecha" class="form-control" required/>
+
+
+
+    </div>
+  </div>  <!-- /fecha -->
+</div>
 
 </div>
 
@@ -288,8 +294,13 @@
         ajax_data: [],
         CodigoEspecialidad: 0,
         CodigoCobertura:1,
-        CodigoPlan:1
-
+        CodigoPlan:1,
+        CodigoProfesional:0,
+        opciones: [
+            {'valor':'Especialidad', 'descripcion': 'Busqueda por Especialidad' },
+            {'valor':'Medico', 'descripcion': 'Busqueda por Médico' },
+            {'valor':'Estudios', 'descripcion': 'Busqueda por Estudios' },
+        ]
     },
       created: function(){
         documento = this.$cookies.get("documento");
@@ -383,7 +394,7 @@
             }
 
             if (index==3){
-              if (!$('input[name="optionsRadios"]').is(':checked')) {
+              if (!$('input[name="opciones"]').is(':checked')) {
 
                     alert('Debe seleccionar una Opción de busqueda');
                       return false;
@@ -395,17 +406,17 @@
             }
 
 
-            if($('input[name=optionsRadios]:radio:checked').val() == "Especialidad" ) {
+            if($('input[name=opciones]:radio:checked').val() == "Especialidad" ) {
               $('#rootwizard').bootstrapWizard('display', 3);
               $('#rootwizard').bootstrapWizard('display', 4);
               $('#rootwizard').bootstrapWizard('hide', 5);
             }
-            if($('input[name=optionsRadios]:radio:checked').val() == "Medico" ) {
+            if($('input[name=opciones]:radio:checked').val() == "Medico" ) {
               $('#rootwizard').bootstrapWizard('hide', 3);
               $('#rootwizard').bootstrapWizard('display', 4);
               $('#rootwizard').bootstrapWizard('hide', 5);
             }
-            if($('input[name=optionsRadios]:radio:checked').val() == "Estudios" ) {
+            if($('input[name=opciones]:radio:checked').val() == "Estudios" ) {
               $('#rootwizard').bootstrapWizard('hide', 3);
               $('#rootwizard').bootstrapWizard('hide', 4);
               $('#rootwizard').bootstrapWizard('display', 5);
@@ -436,7 +447,7 @@
         alert(this);
       });
       $('.item_check2').click(function() {
-        alert(this);
+        //alert(this);
         $(this).children('td').children('input').prop('checked', true);
       });
 
