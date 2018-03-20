@@ -47,6 +47,7 @@
   CodigoCobertura  {{ CodigoCobertura }}
   CodigoPlan  {{ CodigoPlan }}
   CodigoProfesional  {{ CodigoProfesional }}
+  CodigosEstudios {{ CodigosEstudios }}
   </pre>
 
   <div id="rootwizard">
@@ -107,9 +108,9 @@
                   <th>Afiliado</th>
                 </thead>
                 <tbody>
-                    <tr v-for="(cobertura, index) in coberturas" class="item_cobertura">
+                    <tr v-for="(cobertura, index) in coberturas" class="item_check3">
                       <td>
-                          <input type="radio" name="cobertura" :value="CodigoCoberturaPlanValue(cobertura.CodigoCobertura,cobertura.CodigoPlan)" v-model="CodigoCoberturaPlan">
+                          <input type="radio" name="coberturas" :value="CodigoCoberturaPlanValue(cobertura.CodigoCobertura,cobertura.CodigoPlan)" v-model="CodigoCoberturaPlan">
                       </td>
                       <td>{{ cobertura.Contratacion }}</td>
                       <td>{{ cobertura.Cobertura }}</td>
@@ -130,7 +131,7 @@
         <div class="tab-pane" id="tab3">
 
           <div class="panel panel-info">
-            <div class="panel-heading">Opción de busqueda;</div>
+            <div class="panel-heading">Opción de busqueda</div>
             <div class="panel-body">
     			       Seleccione una opción para buscar:<br />
 
@@ -159,9 +160,9 @@
 
    <table class="table table-hover">
         <tbody>
-            <tr v-for="(especialidad, index) in especialidades" class="item_check2">
+            <tr v-for="(especialidad, index) in especialidades" class="itemSelected">
               <td>
-                  <input type="radio" name="especialidades" :value="especialidad.CodigoEspecialidad" v-model="CodigoEspecialidad">
+                  <input type="radio" name="especialidades" v-model="CodigoEspecialidad" :value="especialidad.CodigoEspecialidad">
               </td>
               <td>{{ especialidad.Especialidad }}</td>
 
@@ -204,19 +205,38 @@
 
 </div> <!-- /step 5 -->
 
+<!-- step 6 -->
+<div class="tab-pane" id="tab6">
+<!-- Estudios -->
+  <div class="panel panel-info">
+    <div class="panel-heading">Estudios</div>
+    <div class="panel-body">
+
+     <table class="table table-hover">
+        <tbody>
+            <tr v-for="(estudio, index) in estudios" class="item_check2">
+              <td>
+                  <input type="checkbox" :id="estudio.CodigoEstudio" :value="estudio.CodigoEstudio" v-model="CodigosEstudios">
+              </td>
+              <td>{{ estudio.Estudio }}</td>
+            </tr>
+        </tbody>
+     </table>
+
+    </div>
+  </div>  <!-- /Estudios -->
+
+</div> <!-- /step 6 -->
+
 <div class="tab-pane" id="tab7">
-  Seleccione la fecha estimada.<br />
-
-
   <div class="panel panel-info">
     <div class="panel-heading">Fecha</div>
     <div class="panel-body">
       <p>
         Seleccione la fecha estimada.
       </p>
-   <label for="Fecha">Primer turno a partir del: </label> <input type="date" name="Fecha" class="form-control" required/>
-
-
+   <label for="Fecha">Primer turno a partir del: </label>
+   <input type="date" name="Fecha" class="form-control" required/>
 
     </div>
   </div>  <!-- /fecha -->
@@ -289,6 +309,7 @@
         especialidades:[],
         medicos: [],
         paciente: [],
+        estudios:[],
         documento: "24823959",
         clave: "IF2FZ8",
         ajax_data: [],
@@ -296,6 +317,7 @@
         CodigoCobertura:1,
         CodigoPlan:1,
         CodigoProfesional:0,
+        CodigosEstudios: [],
         opciones: [
             {'valor':'Especialidad', 'descripcion': 'Busqueda por Especialidad' },
             {'valor':'Medico', 'descripcion': 'Busqueda por Médico' },
@@ -318,6 +340,7 @@
           this.obtenerCoberturas();
           this.obtenerEspecialidades();
           //this.obtenerMedicos();
+          this.obtenerEstudios();
 
         }else{
           console.log("login fallido");
@@ -332,9 +355,6 @@
        this.$http.get(ws +'Pacientes.svc/ObtenerCoberturasPaciente?CodigoPaciente=' + this.paciente.CodigoPaciente ).then(function(response){
             this.ajax_data = response.body;
             this.coberturas = this.ajax_data.ObtenerCoberturasPacienteResult.CoberturasPaciente;
-//            this.coberturas.CodigoCoberturaPlan = this.coberturas.CodigoCobertura + '-' + this.coberturas.CodigoPlan;
-
-//            console.log(this.coberturas.CodigoCoberturaPlan);
             }, function(){
                console.log("error al recuperar coberturas")
             });
@@ -356,6 +376,14 @@
            console.log("error al recuperar medicos")
        });
      },
+     obtenerEstudios: function(){
+       this.$http.get(ws +'Turnos.svc/ObtenerEstudios').then(function(response){
+          this.ajax_data = response.body;
+          this.estudios = this.ajax_data.ObtenerEstudiosResult.Estudios;
+        }, function(){
+           console.log("error al recuperar estudios")
+       });
+     },
      CodigoCoberturaPlanValue: function(val1,val2){
        return val1 + ' ' + val2;
      }
@@ -368,7 +396,6 @@
         },
         // setter
         set: function (newValue) {
-          console.log(newValue)
           var names = newValue.split(' ')
           this.CodigoCobertura = names[0]
           this.CodigoPlan = names[names.length - 1]
@@ -384,9 +411,8 @@
           {
             onNext: function(tab, navigation, index) {
               console.log(index);
-
             if (index==2){
-              if (!$('input[name="cobertura"]').is(':checked')) {
+              if (!$('input[name="coberturas"]').is(':checked')) {
 
                     alert('Debe seleccionar una Cobertura');
                       return false;
@@ -423,10 +449,13 @@
             }
 
         }, onTabShow: function(tab, navigation, index) {
+
+          console.log(index);
           var $total = navigation.find('li').length;
           var $current = index+1;
           var $percent = ($current/$total) * 100;
           $('#rootwizard .progress-bar').css({width:$percent+'%'});
+
         }
         , onTabClick(tab, navigation, index){
           return false;
@@ -442,15 +471,16 @@
           $('#rootwizard').find("a[href*='tab1']").trigger('click');
       });
 
-      $('.item_check').click(function() {
-        $(this).children('td').children('input').prop('checked', true);
-        alert(this);
-      });
-      $('.item_check2').click(function() {
-        //alert(this);
-        $(this).children('td').children('input').prop('checked', true);
-      });
+    });
 
+    $('.item_check2').click(function() {
+      console.log('item_check2');
+      $(this).children('td').children('input').prop('checked', true);
+    });
+
+    $('.item_check3').click(function() {
+      console.log('item_check2');
+      //$(this).children('td').children('input').prop('checked', true);
     });
     </script>
 
