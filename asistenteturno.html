@@ -236,11 +236,38 @@
         Seleccione la fecha estimada.
       </p>
    <label for="Fecha">Primer turno a partir del: </label>
-   <input type="date" name="Fecha" class="form-control" required/>
+   <input type="date" name="Fecha" class="form-control" :value="hoy()" :min="hoy()" required>
 
     </div>
   </div>  <!-- /fecha -->
 </div>
+
+<!-- step 8 -->
+<div class="tab-pane" id="tab8">
+<!-- Estudios -->
+  <div class="panel panel-info">
+    <div class="panel-heading">Turnoa</div>
+    <div class="panel-body">
+
+     <table class="table table-hover">
+        <tbody>
+            <tr v-for="(turno, index) in turnos" class="item_check2">
+              <td>
+                  <input type="radio" id="CodigoTurno" name="CodigoTurno" :value="turno.CodigoTurno" v-model="CodigoTurno">
+              </td>
+              <td>{{ turno.Fecha }}</td>
+              <td>{{ turno.Profesional }}</td>
+              <td>{{ turno.Especialidad }}</td>
+              <td>{{ turno.Estudio }}</td>
+
+            </tr>
+        </tbody>
+     </table>
+
+    </div>
+  </div>  <!-- /Estudios -->
+
+</div> <!-- /step 6 -->
 
 </div>
 
@@ -322,7 +349,15 @@
             {'valor':'Especialidad', 'descripcion': 'Busqueda por Especialidad' },
             {'valor':'Medico', 'descripcion': 'Busqueda por Médico' },
             {'valor':'Estudios', 'descripcion': 'Busqueda por Estudios' },
-        ]
+        ],
+        turnos: [
+          {'CodigoTurno': 1 ,'Profesional' :'aaaaaa -1', 'Especialidad': 'sdasdsad', 'Estudio':'eeeee', 'Fecha': '21/03/2018'},
+          {'CodigoTurno': 2 ,'Profesional' :'aaaaaa -2', 'Especialidad': 'sdasdsad', 'Estudio':'eeeee', 'Fecha': '21/03/2018'},
+          {'CodigoTurno': 3 ,'Profesional' :'aaaaaa -3', 'Especialidad': 'sdasdsad', 'Estudio':'eeeee', 'Fecha': '21/03/2018'},
+          {'CodigoTurno': 4 ,'Profesional' :'aaaaaa -4', 'Especialidad': 'sdasdsad', 'Estudio':'eeeee', 'Fecha': '21/03/2018'},
+
+        ],
+        CodigoTurno: 0,
     },
       created: function(){
         documento = this.$cookies.get("documento");
@@ -386,6 +421,16 @@
      },
      CodigoCoberturaPlanValue: function(val1,val2){
        return val1 + ' ' + val2;
+     },
+     hoy: function(){
+       console.log(new Date().toISOString().slice(0,10));
+       return new Date().toISOString().slice(0,10);
+     },
+     CodigoCoberturaPlanValue: function(val1,val2){
+       return val1 + ' ' + val2;
+     },
+     ObtenerTurnos(){
+
      }
    },
    computed: {
@@ -451,8 +496,9 @@
         }, onTabShow: function(tab, navigation, index) {
 
           console.log(index);
+          console.log(navigation.find('li').find('style').length);
           var $total = navigation.find('li').length;
-          var $current = index+1;
+          var $current = index+1+2;
           var $percent = ($current/$total) * 100;
           $('#rootwizard .progress-bar').css({width:$percent+'%'});
 
